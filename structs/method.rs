@@ -9,7 +9,7 @@ impl Rectangle {                    // impl block will be associated with the st
    fn area(&self) -> u32 {
         self.width * self.height
     }
-   
+    
    fn square(size: u32) -> Self {   // Self is the type of the struct
        // Associated functions that are not methods are often used for 
        // constructors. 
