@@ -88,23 +88,40 @@ pub struct Config {
 // }
     
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        }
-        let query = args[1].clone();
-        let filename = args[2].clone();
-        
-        let case_sensitive = env::var("CASE_INSENSITIVE").is_err(); // if CASE_INSENSITIVE is set
-                                                                 // var would return Ok containing the value
-                                                                 // otherwise it would return Err
-        Ok(
-            Config {
-                query,
-                filename,
-                case_sensitive,
-            }
-        )
+    pub fn new(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
+        // if args.len() < 3 {
+        //     return Err("not enough arguments");
+        // }
+        // let query = args[1].clone();
+        // let filename = args[2].clone();
+        // 
+        // let case_sensitive = env::var("CASE_INSENSITIVE").is_err(); // if CASE_INSENSITIVE is set
+        //                                                          // var would return Ok containing the value
+        //                                                          // otherwise it would return Err
+        // Ok(
+        //     Config {
+        //         query,
+        //         filename,
+        //         case_sensitive,
+        //     }
+        // )
+        //
+        args.next();
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
+        let file_path = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a file path"),
+        };
+        let ignore_case = env::var("IGNORE_CASE").is_ok();
+
+        Ok(Config {
+            query: query,
+            filename: file_path,
+            case_sensitive: ignore_case, 
+        })
     }
 }
 
