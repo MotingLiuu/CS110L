@@ -166,6 +166,16 @@ If fail,
 
 `load_config()` returns `Err(error)` in advance, same as no `?` version
 
+----
+
+Methods of Result
+
+`unwrap()`: 提取成功值；失败时 panic
+
+`expect("msg)`: 与 unwrap 类似，但提供自定义 panic 信息
+
+----
+
 ## Option
 
 ```rust
