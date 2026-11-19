@@ -19,3 +19,5 @@ target/
 *.njsproj
 *.sln
 *.swp
+
+.commandcode/
