@@ -2,10 +2,7 @@
 #![no_main]
 
 use core::arch::global_asm;
-use core::fmt::Write;
 use core::panic::PanicInfo;
-
-use crate::console::Console;
 
 mod console;
 mod uart;
@@ -17,6 +14,7 @@ global_asm!(
     "    la sp, boot_stack_top",
     "    call kernel_main",
     ".section .bss.stack",
+    ".balign 16",
     ".globl boot_stack_lower_bound",
     "boot_stack_lower_bound:",
     "    .space 4096 * 4",
@@ -74,7 +72,8 @@ pub extern "C" fn kernel_main() -> ! {
     //         uart.write_volatile(byte);
     //     }
     // }
-    let mut console = Console;
-    write!(console, "hart={}, address={:#x}", 0, 0x8000000).unwrap();
+    // let mut console = Console;
+    // write!(console, "hart={}, address={:#x}", 0, 0x8000000).unwrap();
+    println!("hart={}, address={:#x}, Hello, RISCV!", 0, 0x8000000);
     loop {}
 }
