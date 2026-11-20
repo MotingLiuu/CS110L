@@ -4,10 +4,14 @@ build-std = ["core", "compiler_builtins"]
 build-std-features = ["compiler-builtins-mem"]
 
 [build]
-target = "x86_64-unknown-none.json"
+target = "riscv.json"
 
-[target.'cfg(target_os = "none")']
+[target.'cfg(target_arch = "x86_64")']
 runner = "bootimage runner"
 # runner = "..."（执行代理钩子）
 # 默认情况下 cargo run 会先编译出 可执行文件，之后让当前操作系统的内核加载并运行
 # 设置了 runner 后，会把编译出的二进制文件路径作为 第一个命令行参数，拼接到 runner 后面执行
+
+[target.'cfg(target_arch = "riscv64")']
+rustflags = ["-C", "link-arg=-Tlinker.ld"]
+runner = "qemu-system-riscv64 -machine virt -nographic -bios default -kernel"
