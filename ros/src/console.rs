@@ -1,4 +1,8 @@
-use core::fmt;
+use core::arch::asm;
+use core::fmt::{self, Write};
+use spin::Mutex;
+
+static CONSOLE: Mutex<Console> = Mutex::new(Console);
 
 pub struct Console;
 
@@ -24,14 +28,47 @@ impl fmt::Write for Console {
     }
 }
 
+// 保存旧的 sstatus，同时清除 SIE
+fn irq_save() -> usize {
+    let old: usize;
+
+    unsafe {
+        asm!(
+            "csrrci {old}, sstatus, 2",
+            old = out(reg) old,
+        );
+    }
+
+    old
+}
+
+// 恢复进入临界区之前的中断开关状态
+fn irq_restore(old: usize) {
+    const SSTATUS_SIE: usize = 1 << 1;
+
+    if old & SSTATUS_SIE != 0 {
+        unsafe {
+            asm!("csrsi sstatus, 2");
+        }
+    }
+}
+
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments<'_>) {
-    use core::fmt::Write;
-    // question: why use core::fmt::Write here? use in a function?
-    // not in the beginning of the file?
+    // 1. 保存当前中断状态并关闭本 hart SIE
+    let old = irq_save();
 
-    let mut console = Console;
-    console.write_fmt(args).unwrap();
+    // 2. 获取锁、格式化、输出
+    let result = {
+        let mut writer = CONSOLE.lock();
+        writer.write_fmt(args)
+    }; // MutexGuard 在这里 drop，锁被释放
+
+    // 3. 恢复原本的中断状态
+    irq_restore(old);
+
+    // 4. 在锁释放后处理格式化错误
+    result.unwrap();
 }
 
 #[macro_export]
