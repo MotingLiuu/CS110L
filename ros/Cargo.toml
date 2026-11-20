@@ -25,3 +25,6 @@ rustflags = ["-C", "link-args=-e __start -static -nostartfiles"]
 name = "ros"
 test = false
 bench = false
+
+[dependencies]
+spin = "0.12.3"
