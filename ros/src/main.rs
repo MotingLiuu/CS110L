@@ -2,7 +2,13 @@
 #![no_main]
 
 use core::arch::global_asm;
+use core::fmt::Write;
 use core::panic::PanicInfo;
+
+use crate::console::Console;
+
+mod console;
+mod uart;
 
 global_asm!(
     ".section .text.entry",
@@ -51,7 +57,7 @@ fn panic(_info: &PanicInfo) -> ! {
 //             // offset 是裸指针上的一个方法, 从这个指针往前/后移动 count 个 T，返回新指针。
 //             //
 //             // question: what is unsafe?
-//             // answer:
+//             // answerhttps://os.phil-opp.com/zh-CN/vga-text-mode/:
 //             // 允许调用编译器无法验证的操作
 //             *vga_buffer.offset(i as isize * 2 + 1) = 0xb;
 //         }
@@ -62,11 +68,13 @@ fn panic(_info: &PanicInfo) -> ! {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn kernel_main() -> ! {
-    let uart = 0x1000_0000 as *mut u8;
-    for &byte in b"Hello RISC-V!\n" {
-        unsafe {
-            uart.write_volatile(byte);
-        }
-    }
+    // let uart = 0x1000_0000 as *mut u8;
+    // for &byte in b"Hello RISC-V!\n" {
+    //     unsafe {
+    //         uart.write_volatile(byte);
+    //     }
+    // }
+    let mut console = Console;
+    write!(console, "hart={}, address={:#x}", 0, 0x8000000).unwrap();
     loop {}
 }
